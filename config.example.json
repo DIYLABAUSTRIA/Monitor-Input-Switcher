@@ -1,0 +1,34 @@
+{
+  "port": 5757,
+  "monitor_id": "AOCA612",
+  "inputs": {
+    "hdmi1": {
+      "label": "MacBook",
+      "subtitle": "via Thunderbolt Dock",
+      "icon": "🍎",
+      "tag": "Primary",
+      "vcp_value": 17
+    },
+    "hdmi2": {
+      "label": "HDMI 2",
+      "subtitle": "second HDMI source",
+      "icon": "📺",
+      "tag": "HDMI2",
+      "vcp_value": 18
+    },
+    "dp": {
+      "label": "Windows",
+      "subtitle": "native refresh rate",
+      "icon": "🎮",
+      "tag": "Gaming",
+      "vcp_value": 15
+    }
+  },
+  "notes": [
+    "monitor_id: run probe to find yours — the 'Short Monitor ID' value in the output",
+    "vcp_value: common values are 15=DisplayPort, 17=HDMI1, 18=HDMI2 — verify with probe",
+    "Remove inputs you don't need, add more if required (up to 5 supported in UI)",
+    "Keyboard shortcuts are assigned automatically: 1, 2, 3... per input order",
+    "port: change if 5757 is already in use on your machine"
+  ]
+}

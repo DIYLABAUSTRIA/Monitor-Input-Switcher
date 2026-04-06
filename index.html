@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monitor Switch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:      #0a0a0c;
+    --surface: #111116;
+    --border:  #1e1e28;
+    --text:    #e8e8f0;
+    --muted:   #4a4a5e;
+    --success: #00ff88;
+    --error:   #ff6b35;
+    --mono:    'Share Tech Mono', monospace;
+    --sans:    'Barlow', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    min-height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-weight: 300;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 32px;
+    gap: 0;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  .header-label {
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .header-title {
+    font-size: 42px;
+    font-weight: 700;
+    letter-spacing: -1px;
+  }
+
+  .header-title span { color: var(--accent, #00e5ff); }
+
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 48px;
+    padding: 10px 20px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--surface);
+  }
+
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--muted);
+    transition: background 0.3s;
+    flex-shrink: 0;
+  }
+
+  .status-dot.active { background: var(--success); box-shadow: 0 0 8px var(--success); }
+  .status-dot.error  { background: var(--error);   box-shadow: 0 0 8px var(--error); }
+
+  .buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    width: 100%;
+    max-width: 700px;
+  }
+
+  .btn {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 40px 36px 34px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    overflow: hidden;
+    text-align: left;
+    color: var(--text);
+    font-family: var(--sans);
+  }
+
+  .btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .btn:hover {
+    border-color: var(--btn-color);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 32px color-mix(in srgb, var(--btn-color) 12%, transparent);
+  }
+
+  .btn:hover::before {
+    opacity: 1;
+    background: radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--btn-color) 8%, transparent), transparent 70%);
+  }
+
+  .btn:active { transform: translateY(0) scale(0.98); }
+  .btn.loading { pointer-events: none; opacity: 0.7; }
+  .btn.success { border-color: var(--success) !important; box-shadow: 0 0 24px color-mix(in srgb, var(--success) 20%, transparent) !important; }
+  .btn.error-state { border-color: var(--error) !important; }
+
+  .btn-icon {
+    font-size: 44px;
+    margin-bottom: 20px;
+    line-height: 1;
+    display: block;
+  }
+
+  .btn-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--btn-color);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    opacity: 0.9;
+  }
+
+  .btn-name {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+
+  .btn-sub {
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  .btn-corner {
+    position: absolute;
+    top: 16px; right: 18px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    opacity: 0.5;
+    letter-spacing: 1px;
+  }
+
+  .shortcuts {
+    margin-top: 32px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .shortcuts kbd {
+    display: inline-block;
+    padding: 2px 8px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    background: var(--surface);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 11px;
+    margin-right: 6px;
+  }
+
+  .footer {
+    margin-top: 40px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    text-align: center;
+    letter-spacing: 1px;
+  }
+
+  .footer a { color: var(--muted); text-decoration: none; cursor: pointer; }
+  .footer a:hover { color: #00e5ff; }
+
+  .toast {
+    position: fixed;
+    bottom: 32px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 24px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text);
+    white-space: nowrap;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 100;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.ok  { border-color: var(--success); color: var(--success); }
+  .toast.err { border-color: var(--error);   color: var(--error); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header class="header">
+    <div class="header-label" id="monitorLabel">DDC/CI Monitor Control</div>
+    <h1 class="header-title">Monitor <span>Switch</span></h1>
+  </header>
+
+  <div class="status-bar">
+    <div class="status-dot" id="statusDot"></div>
+    <span id="statusText">connecting...</span>
+  </div>
+
+  <div class="buttons" id="buttonsContainer"></div>
+
+  <div class="shortcuts" id="shortcutsContainer"></div>
+
+  <footer class="footer">
+    <a href="/status">status</a>
+    &nbsp;·&nbsp;
+    <a href="/config">config</a>
+    &nbsp;·&nbsp;
+    <a href="/detect">detect monitor</a>
+    &nbsp;·&nbsp;
+    <a href="https://github.com/yourusername/monitorswitcher" target="_blank">github</a>
+  </footer>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const BASE = window.location.origin;
+  const BUTTONS = __BUTTONS_JSON__;
+
+  // ── Render buttons from config ──────────────────────────────────────────
+  function renderButtons() {
+    const container = document.getElementById('buttonsContainer');
+    const shortcuts = document.getElementById('shortcutsContainer');
+
+    BUTTONS.forEach(btn => {
+      const el = document.createElement('button');
+      el.className = 'btn';
+      el.id = `btn-${btn.key}`;
+      el.style.setProperty('--btn-color', btn.color);
+      el.onclick = () => switchInput(btn.key);
+      el.innerHTML = `
+        <span class="btn-corner">${btn.key.toUpperCase()}</span>
+        <span class="btn-icon">${btn.icon}</span>
+        <div class="btn-tag">${btn.tag}</div>
+        <div class="btn-name">${btn.label}</div>
+        <div class="btn-sub">${btn.subtitle}</div>
+      `;
+      container.appendChild(el);
+
+      const sc = document.createElement('span');
+      sc.innerHTML = `<kbd>${btn.shortcut}</kbd>${btn.label}`;
+      shortcuts.appendChild(sc);
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', e => {
+      const btn = BUTTONS.find(b => b.shortcut === e.key);
+      if (btn) switchInput(btn.key);
+    });
+  }
+
+  // ── Status check ────────────────────────────────────────────────────────
+  async function checkStatus() {
+    try {
+      const r = await fetch(`${BASE}/status`, { signal: AbortSignal.timeout(3000) });
+      const d = await r.json();
+      document.getElementById('statusDot').className = 'status-dot active';
+      document.getElementById('statusText').textContent =
+        `online · ${d.os || ''} · ${d.monitor || 'monitor detected'}`;
+    } catch {
+      document.getElementById('statusDot').className = 'status-dot error';
+      document.getElementById('statusText').textContent = 'server unreachable';
+    }
+  }
+
+  // ── Switch input ─────────────────────────────────────────────────────────
+  async function switchInput(key) {
+    const btn = document.getElementById(`btn-${key}`);
+    if (!btn) return;
+    btn.classList.add('loading');
+    try {
+      const r = await fetch(`${BASE}/switch/${key}`, {
+        method: 'POST',
+        signal: AbortSignal.timeout(12000)
+      });
+      const d = await r.json();
+      btn.classList.remove('loading');
+      if (d.ok) {
+        btn.classList.add('success');
+        showToast('✓ input switched', 'ok');
+        setTimeout(() => btn.classList.remove('success'), 1500);
+      } else {
+        btn.classList.add('error-state');
+        showToast('✗ ' + (d.error || 'failed'), 'err');
+        setTimeout(() => btn.classList.remove('error-state'), 2000);
+      }
+    } catch {
+      btn.classList.remove('loading');
+      btn.classList.add('error-state');
+      showToast('✗ request failed', 'err');
+      setTimeout(() => btn.classList.remove('error-state'), 2000);
+    }
+  }
+
+  // ── Toast ────────────────────────────────────────────────────────────────
+  let toastTimer;
+  function showToast(msg, type = '') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast show ${type}`;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  // ── Init ─────────────────────────────────────────────────────────────────
+  renderButtons();
+  checkStatus();
+  setInterval(checkStatus, 15000);
+</script>
+</body>
+</html>
