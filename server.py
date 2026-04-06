@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 MonitorSwitcher - Cross-platform web-based DDC/CI monitor input switcher
-https://github.com/yourusername/monitorswitcher
+https://github.com/DIYLABAUSTRIA/Monitor-Input-Switcher/
 
 Supported backends:
   Windows : ControlMyMonitor.exe (NirSoft)
