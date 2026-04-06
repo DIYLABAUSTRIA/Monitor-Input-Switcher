@@ -4,7 +4,7 @@ A lightweight, self-contained web server that lets you switch your monitor's inp
 
 No cloud, no accounts, no bloat. One Python file, one `config.json`.
 
-![MonitorSwitcher UI — two large buttons: MacBook (HDMI1) and Windows (DP)](screenshot.png)
+![MonitorSwitcher UI — two large buttons: MacBook (HDMI1) and Windows (DP)](monitorSwitch.JPG)
 
 ---
 
